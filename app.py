@@ -4,8 +4,7 @@ from autogluon.tabular import TabularDataset, TabularPredictor
 from autogluon.common.utils.utils import setup_outputdir
 from autogluon.core.utils.loaders import load_pkl
 from autogluon.core.utils.savers import save_pkl
-# from openai import OpenAI
-import openai
+from openai import OpenAI
 import os
 from io import BytesIO
 
@@ -179,7 +178,7 @@ import openai
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # # Set your OpenAI GPT API key
-client = openai.OpenAI(
+client = OpenAI(
 #    api_key=API_KEY
 )
 
