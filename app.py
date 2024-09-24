@@ -4,7 +4,8 @@ from autogluon.tabular import TabularDataset, TabularPredictor
 from autogluon.common.utils.utils import setup_outputdir
 from autogluon.core.utils.loaders import load_pkl
 from autogluon.core.utils.savers import save_pkl
-from openai import OpenAI
+# from openai import OpenAI
+import openai
 import os
 from io import BytesIO
 
