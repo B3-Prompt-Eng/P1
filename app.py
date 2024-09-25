@@ -119,33 +119,14 @@ def process_data(sale_file, customer_file):
     # st.dataframe(merged_df)
     if not all(col in merged_df.columns for col in ["Credit Term(Day)", "Credit Value"]):
         st.write("Predicting Credit Term(Day) and Credit Value...")
-        train_sale_df = pd.read_csv("Customer Data080824.xlsx")
-
-        # Check if the first row is an extra header
-        if train_sale_df.iloc[0].isnull().sum() == 0:
-            train_sale_df.columns = train_sale_df.iloc[0]
-            train_sale_df = train_sale_df[1:]
-        train_sale_df.reset_index(drop=True, inplace=True)
-    
-        # Rename columns for consistency
-        train_sale_df.rename(columns={'รหัสลูกค้า': 'Customer ID'}, inplace=True)
-    
-        # Read customer data
-        train_cus_df = pd.read_excel(customer_file)
-    
-        # Merge sale and customer data
-        train_df = pd.merge(train_sale_df, train_cus_df, on='Customer ID', how='inner')
-        train_df.fillna(0, inplace=True)
-        # Remove commas and parentheses from all values in filtered_df
-        train_df = train_df.replace({',': '', r'\(': '', r'\)': ''}, regex=True)
+        
         labels = ['Credit Term(Day)','Credit Value']  # which columns to predict based on the others
         problem_types = ['multiclass', 'multiclass']  # type of each prediction problem (optional)
         eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
-        time_limit = 15
         
         multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
-        multi_predictor.fit(train_df, time_limit=time_limit, presets='high_quality')
-        predictions = multi_predictor.predict(merged_df)
+        predictor = multi_predictor.load("P1_Models_v2")
+        predictions = predictor.predict(merged_df)
         
         merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
         merged_df["Credit Value"] = predictions["Credit Value"]
@@ -159,7 +140,7 @@ def process_data(sale_file, customer_file):
     "ราคารวม": float,
     "Credit Value": float,
     "Credit Term(Day)": float
-})
+    })
     
     # After ensuring the correct data types, perform the groupby and aggregation
     customer_summary = merged_df.groupby('Customer ID').agg({
