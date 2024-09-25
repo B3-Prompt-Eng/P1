@@ -124,11 +124,12 @@ def process_data(sale_file, customer_file):
         labels = ['Credit Term(Day)','Credit Value']  # which columns to predict based on the others
         problem_types = ['multiclass', 'multiclass']  # type of each prediction problem (optional)
         eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
-        time_limit = 120
+        # time_limit = 120
         
         multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
-        multi_predictor.fit(merged_df, time_limit=time_limit, presets='high_quality')
-        predictions = multi_predictor.predict(merged_df)
+        predictor = multi_predictor.load("Model.zip")
+        # multi_predictor.fit(merged_df, time_limit=time_limit, presets='high_quality')
+        predictions = predictor.predict(merged_df)
         
         merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
         merged_df["Credit Value"] = predictions["Credit Value"]
