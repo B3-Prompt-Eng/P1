@@ -10,8 +10,6 @@ from io import BytesIO
 
 
 class MultilabelPredictor:
-    multi_predictor_file = r"C:\Users\tewwa\Prompt_Eng\P1\agModels-predictEducationClass\multilabel_predictor.pkl"
-
     def __init__(self, labels, path=None, problem_types=None, eval_metrics=None, consider_labels_correlation=True, **kwargs):
         if len(labels) < 2:
             raise ValueError("MultilabelPredictor is only intended for predicting MULTIPLE labels (columns).")
@@ -146,7 +144,6 @@ def process_data(sale_file, customer_file):
         time_limit = 15
         
         multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
-        # predictor = multi_predictor.load("Model.zip")
         multi_predictor.fit(train_df, time_limit=time_limit, presets='high_quality')
         predictions = multi_predictor.predict(merged_df)
         
