@@ -115,10 +115,10 @@ def process_data(sale_file, customer_file):
 
     # Merge sale and customer data
     merged_df = pd.merge(sale_df, cus_df, on='Customer ID', how='inner')
-    
+    merged_df.fillna(0, inplace=True)
     # Remove commas and parentheses from all values in filtered_df
     merged_df = merged_df.replace({',': '', r'\(': '', r'\)': ''}, regex=True)
-    
+    # st.dataframe(merged_df)
     if not all(col in merged_df.columns for col in ["Credit Term(Day)", "Credit Value"]):
         st.write("Predicting Credit Term(Day) and Credit Value...")
         labels = ['Credit Term(Day)','Credit Value']  # which columns to predict based on the others
@@ -143,12 +143,13 @@ def process_data(sale_file, customer_file):
     "Credit Value": float,
     "Credit Term(Day)": float
 })
-
+    
     # After ensuring the correct data types, perform the groupby and aggregation
     customer_summary = merged_df.groupby('Customer ID').agg({
         'มูลค่ารวมก่อนภาษี': ['sum', 'mean'],      # Total Spending, Average, Variability
         'สถานะรายการ': lambda x: (x == 'สำเร็จ').mean(), # Percentage of successful payments
-        'จำนวนเงินที่ชำระ': 'sum',                        # Total Paid Amount
+        'จำนวนเงินที่ชำระ': 'sum',
+        'Type Of Customer': 'first',                       # Type of Customer
         'Credit Value': ['sum', 'mean'],                   # Total and Average Credit Value
         'Credit Term(Day)': 'mean',                        # Average Credit Term
         'Customer ID': 'count'                             # Frequency of Purchases
@@ -161,18 +162,19 @@ def process_data(sale_file, customer_file):
     customer_summary.rename(columns={
         'มูลค่ารวมก่อนภาษี_sum': 'Total_Spending',
         'มูลค่ารวมก่อนภาษี_mean': 'Average_Transaction_Amount',
-        'สถานะรายการ': 'Successful_Payment_Rate',
+        'สถานะรายการ_<lambda>': 'Successful_Payment_Rate',
         'จำนวนเงินที่ชำระ_sum': 'Total_Paid_Amount',
         'Credit Value_sum': 'Total_Credit_Value',
         'Credit Value_mean': 'Average_Credit_Value',
         'Credit Term(Day)_mean': 'Average_Credit_Term',
-        'Customer ID_count': 'Frequency_of_Purchases'
+        'Customer ID_count': 'Frequency_of_Purchases',
+        'Type Of Customer_first': 'Type_Of_Customer'
     }, inplace=True)
 
     # Reset index to make 'Customer ID' a column again
     customer_summary.reset_index(inplace=True)
     return merged_df, customer_summary
-
+    
 import openai
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
