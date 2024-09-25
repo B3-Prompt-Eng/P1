@@ -127,7 +127,7 @@ def process_data(sale_file, customer_file):
         problem_types = ['multiclass', 'multiclass']  # type of each prediction problem (optional)
         eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
         
-        # multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
+        multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
         
         # model_dir = "P1_Models_v2"
         # model_path = os.path.join(model_dir)
