@@ -129,13 +129,13 @@ def process_data(sale_file, customer_file):
         
         # multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
         
-        model_dir = "P1_Models_v2"
-        model_path = os.path.join(model_dir)
+        # model_dir = "P1_Models_v2"
+        # model_path = os.path.join(model_dir)
 
         # Load the predictor
-        predictor = MultilabelPredictor.load(model_path)
+        # predictor = MultilabelPredictor.load(model_path)
         
-        # predictor = multi_predictor.load("Program/P1_Models_v2/multilabel_predictor.pkl")
+        predictor = multi_predictor.load("P1_Models_v2")
         predictions = predictor.predict(merged_df)
         
         merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
