@@ -4,11 +4,11 @@ from autogluon.tabular import TabularDataset, TabularPredictor
 from autogluon.common.utils.utils import setup_outputdir
 from autogluon.core.utils.loaders import load_pkl
 from autogluon.core.utils.savers import save_pkl
-from openai import OpenAI
+import openai
 import os
 from io import BytesIO
 
-print(os.getcwd())
+
 class MultilabelPredictor:
     multi_predictor_file = r"multilabel_predictor.pkl"
 
@@ -118,7 +118,6 @@ def process_data(sale_file, customer_file):
     merged_df.fillna(0, inplace=True)
     # Remove commas and parentheses from all values in filtered_df
     merged_df = merged_df.replace({',': '', r'\(': '', r'\)': ''}, regex=True)
-    
     # st.dataframe(merged_df)
     if not all(col in merged_df.columns for col in ["Credit Term(Day)", "Credit Value"]):
         st.write("Predicting Credit Term(Day) and Credit Value...")
@@ -128,14 +127,7 @@ def process_data(sale_file, customer_file):
         eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
         
         multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
-        
-        # model_dir = "P1_Models_v2"
-        # model_path = os.path.join(model_dir)
-
-        # Load the predictor
-        # predictor = MultilabelPredictor.load(model_path)
-        
-        predictor = multi_predictor.load("P1_Models_Test_1")
+        predictor = multi_predictor.load(r"P1_Models_Test_1")
         predictions = predictor.predict(merged_df)
         
         merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
@@ -150,7 +142,7 @@ def process_data(sale_file, customer_file):
     "ราคารวม": float,
     "Credit Value": float,
     "Credit Term(Day)": float
-    })
+})
     
     # After ensuring the correct data types, perform the groupby and aggregation
     customer_summary = merged_df.groupby('Customer ID').agg({
@@ -182,8 +174,11 @@ def process_data(sale_file, customer_file):
     # Reset index to make 'Customer ID' a column again
     customer_summary.reset_index(inplace=True)
     return merged_df, customer_summary
-    
+
+
+
 import openai
+from openai import OpenAI
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
