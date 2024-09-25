@@ -75,7 +75,7 @@ class MultilabelPredictor:
 
     @classmethod
     def load(cls, path):
-        return load_pkl.load(path=os.path.join(path, cls.multi_predictor_file))
+        return load_pkl.load(path=path)
 
     def get_predictor(self, label):
         predictor = self.predictors[label]
@@ -126,7 +126,7 @@ def process_data(sale_file, customer_file):
         eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
         
         multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
-        predictor = multi_predictor.load("P1_Models_v2/")
+        predictor = multi_predictor.load("Program/P1_Models_v2/multilabel_predictor.pkl")
         predictions = predictor.predict(merged_df)
         
         merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
