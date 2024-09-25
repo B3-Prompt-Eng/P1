@@ -8,7 +8,7 @@ from openai import OpenAI
 import os
 from io import BytesIO
 
-
+print(os.getcwd())
 class MultilabelPredictor:
     multi_predictor_file = 'multilabel_predictor.pkl'
     def __init__(self, labels, path=None, problem_types=None, eval_metrics=None, consider_labels_correlation=True, **kwargs):
