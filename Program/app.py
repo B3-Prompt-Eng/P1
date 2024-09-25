@@ -10,7 +10,7 @@ from io import BytesIO
 
 print(os.getcwd())
 class MultilabelPredictor:
-    multi_predictor_file = 'multilabel_predictor.pkl'
+    multi_predictor_file = 'Program/P1_Models_v2/multilabel_predictor.pkl'
     def __init__(self, labels, path=None, problem_types=None, eval_metrics=None, consider_labels_correlation=True, **kwargs):
         if len(labels) < 2:
             raise ValueError("MultilabelPredictor is only intended for predicting MULTIPLE labels (columns).")
@@ -27,7 +27,7 @@ class MultilabelPredictor:
 
         for i in range(len(labels)):
             label = labels[i]
-            path_i = os.path.join(self.path, "Predictor_" + str(label))
+            path_i = os.path.join("Program/P1_Models_v2/", "Predictor_" + str(label))
             problem_type = problem_types[i] if problem_types is not None else None
             eval_metric = eval_metrics[i] if eval_metrics is not None else None
             self.predictors[label] = TabularPredictor(label=label, problem_type=problem_type, eval_metric=eval_metric, path=path_i, **kwargs)
