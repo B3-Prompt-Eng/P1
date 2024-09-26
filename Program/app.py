@@ -149,7 +149,7 @@ def process_data(sale_file, customer_file):
     
     # After ensuring the correct data types, perform the groupby and aggregation
     customer_summary = merged_df.groupby('Customer ID').agg({
-        'มูลค่ารวมก่อนภาษี': ['sum', 'mean'],      # Total Spending, Average, Variability
+        'Total value before tax': ['sum', 'mean'],      # Total Spending, Average, Variability
         'สถานะรายการ': lambda x: (x == 'สำเร็จ').mean(), # Percentage of successful payments
         'จำนวนเงินที่ชำระ': 'sum',
         'Type Of Customer': 'first',                       # Type of Customer
