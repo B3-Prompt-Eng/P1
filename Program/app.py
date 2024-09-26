@@ -163,8 +163,8 @@ def process_data(sale_file, customer_file):
 
     # Rename columns for clarity
     customer_summary.rename(columns={
-        'มูลค่ารวมก่อนภาษี_sum': 'Total_Spending',
-        'มูลค่ารวมก่อนภาษี_mean': 'Average_Transaction_Amount',
+        'Total value before tax_sum': 'Total_Spending',
+        'Total value before tax_mean': 'Average_Transaction_Amount',
         'สถานะรายการ_<lambda>': 'Successful_Payment_Rate',
         'จำนวนเงินที่ชำระ_sum': 'Total_Paid_Amount',
         'Credit Value_sum': 'Total_Credit_Value',
@@ -236,7 +236,7 @@ def save_to_excel_single(customer_id, customer_type, total_spending, avg_transac
             'Risk Level': [risk_level]
         })
         summary_df.to_excel(writer, sheet_name='Summary', index=False)
-        customer_info[['มูลค่ารวมก่อนภาษี', 'สถานะรายการ']].to_excel(writer, sheet_name='Customer Activities', index=False)
+        customer_info[['Total value before tax', 'สถานะรายการ']].to_excel(writer, sheet_name='Customer Activities', index=False)
     
     # Rewind the BytesIO stream to the beginning for download in Streamlit
     output.seek(0)
@@ -270,8 +270,8 @@ if sale_file and customer_file:
             if customer_info.empty:
                 st.error(f"Customer ID '{customer_id}' not found.")
             else:
-                total_spending = customer_info['มูลค่ารวมก่อนภาษี'].sum()
-                avg_transaction = customer_info['มูลค่ารวมก่อนภาษี'].mean()
+                total_spending = customer_info['Total value before tax'].sum()
+                avg_transaction = customer_info['Total value before tax'].mean()
                 total_paid_amount = customer_info['จำนวนเงินที่ชำระ'].sum()
                 customer_type = customer_info['Type Of Customer'].iloc[0] if 'Type Of Customer' in customer_info.columns else 'Unknown'
                 customer_summary_row = customer_summary[customer_summary['Customer ID'] == customer_id].iloc[0]
