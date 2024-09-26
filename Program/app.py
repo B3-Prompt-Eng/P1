@@ -112,7 +112,8 @@ def process_data(sale_file, customer_file):
 
     # Read customer data
     cus_df = pd.read_excel(customer_file)
-
+    sale_df['Customer ID'] = sale_df['Customer ID'].astype(str)
+    cus_df['Customer ID'] = cus_df['Customer ID'].astype(str)
     # Merge sale and customer data
     merged_df = pd.merge(sale_df, cus_df, on='Customer ID', how='inner')
     merged_df.fillna(0, inplace=True)
