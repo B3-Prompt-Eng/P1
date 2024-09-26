@@ -135,8 +135,9 @@ def process_data(sale_file, customer_file):
         merged_df["Credit Value"] = predictions["Credit Value"]
     st.dataframe(merged_df)
     st.write(merged_df.columns)
+    sale_df.rename(columns={'มูลค่ารวมก่อนภาษี': 'Total value before tax'}, inplace=True)
     merged_df = merged_df.astype({
-    "มูลค่ารวมก่อนภาษี": float,
+    "Total value before tax": float,
     "มูลค่า": float,
     "จำนวนเงินที่ชำระ": float,
     "จำนวน": float,
