@@ -203,7 +203,8 @@ def assess_risk(customer_summary_row):
                 Determine the risk level (ต่ำ, กลาง, สูง). 0 average credit value and 0 average credit term(Day) mean the customer has no debt which is good. You think step by step. Clearly explain your answer based on the following details: {customer_details}.
                 You must respond in Thai. Format your response as: ความเสี่ยง : เหตุผล '''},
                 {"role": "user", "content": "Determine the risk level (ต่ำ, กลาง, สูง)."}
-            ]
+            ],
+            temperature=0.1
         )
 
         # Return GPT-API response
