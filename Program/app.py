@@ -202,7 +202,7 @@ def assess_risk(customer_summary_row):
 {
     "role": "system",
     "content": f'''
-You are an expert in credit risk assessment. Your task is to determine the risk level (Low, Medium, High) of a customer based on the provided customer details.
+You are an expert in credit risk assessment. Your task is to determine the risk level (Very Low, Low, Medium, High, Very High) of a customer based on the provided customer details.
 
 Consider the following guidelines:
 
@@ -222,7 +222,7 @@ Please analyze the information step by step and clearly explain your reasoning b
 
 **Response Format:**
 
-ความเสี่ยง: [ต่ำ/กลาง/สูง]
+ความเสี่ยง: [ต่ำมาก/ต่ำ/กลาง/สูง/สูงมาก]
 
 เหตุผล: [คำอธิบายอย่างละเอียดของคุณ]
 
@@ -233,10 +233,10 @@ Please analyze the information step by step and clearly explain your reasoning b
 },
 {
     "role": "user",
-    "content": "Please determine the risk level (Low, Medium, High) based on the provided information."
+    "content": "Please determine the risk level (Very Low, Low, Medium, High, Very High) based on the provided information."
 }
             ],
-            temperature=0.3
+            temperature=0.2
         )
 
         # Return GPT-API response
