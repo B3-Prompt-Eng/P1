@@ -199,12 +199,44 @@ def assess_risk(customer_summary_row):
         response = client.chat.completions.create(
             model="gpt-4o-mini",  # Use an appropriate model available to you
             messages=[
-                {"role": "system", "content": f'''You are an expert in credit risk assessment.
-                Determine the risk level (ต่ำ, กลาง, สูง). 0 average credit value and 0 average credit term(Day) mean the customer has no debt which is good. You think step by step. Clearly explain your answer based on the following details: {customer_details}.
-                You must respond in Thai. Format your response as: ความเสี่ยง : เหตุผล '''},
-                {"role": "user", "content": "Determine the risk level (ต่ำ, กลาง, สูง)."}
+{
+    "role": "system",
+    "content": f'''
+You are an expert in credit risk assessment. Your task is to determine the risk level (Low, Medium, High) of a customer based on the provided customer details.
+
+Consider the following guidelines:
+
+- Customers with an average credit value of 0 and an average credit term (Day) of 0 have no debt, which is positive.
+- If a customer has a high average credit term (Day) or high average credit value, the risk should not be classified as Low.
+- Other factors to consider include:
+  - Total Spending
+  - Total Paid Amount
+  - Successful Payment Rate
+  - Frequency of Purchases
+  - Type of Customer
+  - Average Transaction Amount
+
+Please analyze the information step by step and clearly explain your reasoning based on the customer details provided.
+
+**Your response should be in clear and natural Thai.**
+
+**Response Format:**
+
+ความเสี่ยง: [ต่ำ/กลาง/สูง]
+
+เหตุผล: [คำอธิบายอย่างละเอียดของคุณ]
+
+**Customer Details:**
+
+{customer_details}
+'''
+},
+{
+    "role": "user",
+    "content": "Please determine the risk level (Low, Medium, High) based on the provided information."
+}
             ],
-            temperature=0.1
+            temperature=0.3
         )
 
         # Return GPT-API response
