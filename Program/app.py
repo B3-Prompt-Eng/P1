@@ -224,7 +224,7 @@ Please analyze the information step by step and clearly explain your reasoning b
 
 ความเสี่ยง: [ต่ำมาก/ต่ำ/กลาง/สูง/สูงมาก]
 
-เหตุผล: [คำอธิบายอย่างละเอียดของคุณ]
+เหตุผล: [คำอธิบายอย่างละเอียดของคุณ] in a paragraph
 
 **Customer Details:**
 
