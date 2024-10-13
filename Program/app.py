@@ -236,7 +236,7 @@ Please analyze the information step by step and clearly explain your reasoning b
     "content": "Please determine the risk level (Very Low, Low, Medium, High, Very High) based on the provided information."
 }
             ],
-            temperature=0.2
+            temperature=0.1
         )
 
         # Return GPT-API response
