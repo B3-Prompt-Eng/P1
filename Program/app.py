@@ -140,7 +140,7 @@ def process_data(sale_file, customer_file):
         eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
         
         multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
-        predictor = multi_predictor.load(os.path.join("P1_Models_New", "Predictor_Credit Term(Day)"))
+        predictor = multi_predictor.load(model_file)
         predictions = predictor.predict(merged_df.drop(['Customer ID'], axis=1))
         
         merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
@@ -179,8 +179,8 @@ def process_data(sale_file, customer_file):
         'มูลค่ารวมก่อนภาษี_mean': 'Average_Transaction_Amount',
         'สถานะรายการ_<lambda>': 'Successful_Payment_Rate',
         'จำนวนเงินที่ชำระ_sum': 'Total_Paid_Amount',
-        'Credit Value_mean': 'Recommended Credit_Value',
-        'Credit Term(Day)_mean': 'Recommended Credit_Term',
+        'Credit Value_mean': 'Recommended_Credit_Value',
+        'Credit Term(Day)_mean': 'Recommended_Credit_Term',
         'Customer ID_count': 'Frequency_of_Purchases',
         'Type Of Customer_first': 'Type_Of_Customer'
     }, inplace=True)
@@ -261,7 +261,7 @@ st.title("Customer Risk Assessment Tool")
 # File Uploads
 sale_file = st.file_uploader("Upload Sale Data", type=["xlsx", "csv"])
 customer_file = st.file_uploader("Upload Customer Data", type=["xlsx", "csv"])
-
+model_file = st.file_uploader("Upload Model Folder")
 if sale_file and customer_file:
     st.write("Processing Data...")
     merged_df, customer_summary = process_data(sale_file, customer_file)
