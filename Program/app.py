@@ -194,14 +194,10 @@ def process_data(sale_file, customer_file):
     customer_summary.reset_index(inplace=True)
     return merged_df, customer_summary
 
-
-
-import openai
-
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # # Set your OpenAI GPT API key
-client = OpenAI(
+client = openai.OpenAI(
 #    api_key=API_KEY
 )
 
