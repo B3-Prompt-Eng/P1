@@ -116,7 +116,14 @@ def process_data(sale_file, customer_file):
     sale_df.rename(columns={'รหัสลูกค้า': 'Customer ID'}, inplace=True)
 
     # Read customer data
-    cus_df = pd.read_excel(customer_file)
+    # cus_df = pd.read_excel(customer_file)
+
+    if customer_file.name.endswith('.xlsx'):
+        cus_df = pd.read_excel(customer_file)
+    elif customer_file.name.endswith('.csv'):
+        cus_df = pd.read_csv(customer_file)
+    else:
+        st.error("Unsupported file format. Please upload an Excel or CSV file.")
 
     # Merge sale and customer data
     merged_df = pd.merge(sale_df, cus_df, on='Customer ID', how='inner')
@@ -251,8 +258,8 @@ def save_to_excel_single(customer_id, customer_type, total_spending, avg_transac
 st.title("Customer Risk Assessment Tool")
 
 # File Uploads
-sale_file = st.file_uploader("Upload Sale Data (CSV)", type=["csv"])
-customer_file = st.file_uploader("Upload Customer Data (Excel)", type=["xlsx"])
+sale_file = st.file_uploader("Upload Sale Data", type=["xlsx", "csv"])
+customer_file = st.file_uploader("Upload Customer Data", type=["xlsx", "csv"])
 
 if sale_file and customer_file:
     st.write("Processing Data...")
