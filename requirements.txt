@@ -2,4 +2,4 @@ streamlit
 openai
 openpyxl
 autogluon
-path
+path==16.6.0
