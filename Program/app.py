@@ -96,15 +96,6 @@ class MultilabelPredictor:
             data[label] = predictor.predict(data, **kwargs)
         return data[self.labels] if not as_proba else predproba_dict
 
-# predicted = {P00001	15	100000
-# P00164	30	80000
-# P50006	30	350000
-# P50053	30	50000
-# P50114	30	50000
-# PF00002	27	66050.5390625
-# PF00018	7	30000
-# PG00001	27	48627.8671875}
-# Function to process sales and customer data
 def process_data(sale_file, customer_file):
     # Read sale data
     if sale_file.name.endswith('.xlsx'):
@@ -138,19 +129,19 @@ def process_data(sale_file, customer_file):
     # Remove commas and parentheses from all values in filtered_df
     merged_df = merged_df.replace({',': '', r'\(': '', r'\)': ''}, regex=True)
     # st.dataframe(merged_df)
-    if not all(col in merged_df.columns for col in ["Credit Term(Day)", "Credit Value"]):
-        st.write("Predicting Credit Term(Day) and Credit Value...")
+    # if not all(col in merged_df.columns for col in ["Credit Term(Day)", "Credit Value"]):
+    #     st.write("Predicting Credit Term(Day) and Credit Value...")
         
-        labels = ['Credit Term(Day)','Credit Value']  # which columns to predict based on the others
-        problem_types = ['multiclass', 'multiclass']  # type of each prediction problem (optional)
-        eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
+    #     labels = ['Credit Term(Day)','Credit Value']  # which columns to predict based on the others
+    #     problem_types = ['multiclass', 'multiclass']  # type of each prediction problem (optional)
+    #     eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
         
-        multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
-        predictor = multi_predictor.load(r"P1_Models_New")
-        predictions = predictor.predict(merged_df.drop(['Customer ID'], axis=1))
+    #     multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
+    #     predictor = multi_predictor.load(r"P1_Models_New")
+    #     predictions = predictor.predict(merged_df.drop(['Customer ID'], axis=1))
         
-        merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
-        merged_df["Credit Value"] = predictions["Credit Value"]
+    #     merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
+    #     merged_df["Credit Value"] = predictions["Credit Value"]
     try:
         merged_df = merged_df.astype({
         "มูลค่ารวมก่อนภาษี": float,
@@ -163,19 +154,21 @@ def process_data(sale_file, customer_file):
         "Credit Term(Day)": float
     })
     except Exception as e:
-        st.write(f"An error occurred while converting data types: {e}")
+        print(f"An error occurred while converting data types: {e}")
     
     # After ensuring the correct data types, perform the groupby and aggregation
-    customer_summary = merged_df.groupby('Customer ID').agg({
-        'มูลค่ารวมก่อนภาษี': ['sum', 'mean'],      # Total Spending, Average, Variability
-        'สถานะรายการ': lambda x: (x == 'สำเร็จ').mean(), # Percentage of successful payments
-        'จำนวนเงินที่ชำระ': 'sum',
-        'Type Of Customer': 'first',                       # Type of Customer
-        'Credit Value': 'mean',                   # Total and Average Credit Value
-        'Credit Term(Day)': 'mean',                        # Average Credit Term
-        'Customer ID': 'count'                             # Frequency of Purchases
-    })
-
+    try:
+        customer_summary = merged_df.groupby('Customer ID').agg({
+            'มูลค่ารวมก่อนภาษี': ['sum', 'mean'],      # Total Spending, Average, Variability
+            'สถานะรายการ': lambda x: (x == 'สำเร็จ').mean(), # Percentage of successful payments
+            'จำนวนเงินที่ชำระ': 'sum',
+            'Type Of Customer': 'first',                       # Type of Customer
+            'Credit Value': 'mean',                   # Total and Average Credit Value
+            'Credit Term(Day)': 'mean',                        # Average Credit Term
+            'Customer ID': 'count'                             # Frequency of Purchases
+        })
+    except Exception as e:
+        print(f"An error occurred while converting data types: {e}")
     # Flatten the MultiIndex columns
     customer_summary.columns = ['_'.join(col).strip() for col in customer_summary.columns.values]
 
