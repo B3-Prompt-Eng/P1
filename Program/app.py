@@ -284,7 +284,7 @@ if sale_file and customer_file:
     # Input for customer ID
     customer_id = st.text_input("Enter Customer ID and enter to view credit term and credit value for single customer")
     if customer_id:
-        database = pd.read_csv("https://raw.githubusercontent.com/B3-Prompt-Eng/P1/refs/heads/main/Program/2024-10-15T10-43_export.csv)
+        database = pd.read_csv("https://raw.githubusercontent.com/B3-Prompt-Eng/P1/refs/heads/main/Program/2024-10-15T10-43_export.csv")
         database['Customer ID'] = database['Customer ID'].astype(str).str.zfill(5)
         database.drop(columns=['Unnamed: 0'], inplace=True)
         customer_row = database[database['Customer ID'] == customer_id]
