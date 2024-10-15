@@ -10,7 +10,7 @@ from io import BytesIO
 
 
 class MultilabelPredictor:
-    multi_predictor_file = r"multilabel_predictor.pkl"
+    multi_predictor_file = r"C:\Users\tewwa\Prompt_Eng\P1\agModels-predictEducationClass\multilabel_predictor.pkl"
 
     def __init__(self, labels, path=None, problem_types=None, eval_metrics=None, consider_labels_correlation=True, **kwargs):
         if len(labels) < 2:
@@ -99,7 +99,12 @@ class MultilabelPredictor:
 # Function to process sales and customer data
 def process_data(sale_file, customer_file):
     # Read sale data
-    sale_df = pd.read_csv(sale_file)
+    if sale_file.name.endswith('.xlsx'):
+        sale_df = pd.read_excel(sale_file)
+    elif sale_file.name.endswith('.csv'):
+        sale_df = pd.read_csv(sale_file)
+    else:
+        st.error("Unsupported file format. Please upload an Excel or CSV file.")
 
     # Check if the first row is an extra header
     if sale_df.iloc[0].isnull().sum() == 0:
@@ -112,8 +117,7 @@ def process_data(sale_file, customer_file):
 
     # Read customer data
     cus_df = pd.read_excel(customer_file)
-    sale_df['Customer ID'] = sale_df['Customer ID'].astype(str)
-    cus_df['Customer ID'] = cus_df['Customer ID'].astype(str)
+
     # Merge sale and customer data
     merged_df = pd.merge(sale_df, cus_df, on='Customer ID', how='inner')
     merged_df.fillna(0, inplace=True)
@@ -128,32 +132,32 @@ def process_data(sale_file, customer_file):
         eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
         
         multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
-        predictor = multi_predictor.load(r"Program/P1_Models_Test_1")
-        predictions = predictor.predict(merged_df)
+        predictor = multi_predictor.load(r"P1_Models_New1")
+        predictions = predictor.predict(merged_df.drop(['Customer ID'], axis=1))
         
         merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
         merged_df["Credit Value"] = predictions["Credit Value"]
-    # st.dataframe(merged_df)
-    # st.write(merged_df.columns)
-    merged_df.rename(columns={'มูลค่ารวมก่อนภาษี': 'Total value before tax'}, inplace=True)
-    merged_df = merged_df.astype({
-    "Total value before tax": float,
-    "มูลค่า": float,
-    "จำนวนเงินที่ชำระ": float,
-    "จำนวน": float,
-    "ราคาต่อหน่วย": float,
-    "ราคารวม": float,
-    "Credit Value": float,
-    "Credit Term(Day)": float
-})
+    try:
+        merged_df = merged_df.astype({
+        "มูลค่ารวมก่อนภาษี": float,
+        "มูลค่า": float,
+        "จำนวนเงินที่ชำระ": float,
+        "จำนวน": float,
+        "ราคาต่อหน่วย": float,
+        "ราคารวม": float,
+        "Credit Value": float,
+        "Credit Term(Day)": float
+    })
+    except Exception as e:
+        st.write(f"An error occurred while converting data types: {e}")
     
     # After ensuring the correct data types, perform the groupby and aggregation
     customer_summary = merged_df.groupby('Customer ID').agg({
-        'Total value before tax': ['sum', 'mean'],      # Total Spending, Average, Variability
+        'มูลค่ารวมก่อนภาษี': ['sum', 'mean'],      # Total Spending, Average, Variability
         'สถานะรายการ': lambda x: (x == 'สำเร็จ').mean(), # Percentage of successful payments
         'จำนวนเงินที่ชำระ': 'sum',
         'Type Of Customer': 'first',                       # Type of Customer
-        'Credit Value': ['sum', 'mean'],                   # Total and Average Credit Value
+        'Credit Value': 'mean',                   # Total and Average Credit Value
         'Credit Term(Day)': 'mean',                        # Average Credit Term
         'Customer ID': 'count'                             # Frequency of Purchases
     })
@@ -163,30 +167,24 @@ def process_data(sale_file, customer_file):
 
     # Rename columns for clarity
     customer_summary.rename(columns={
-        'Total value before tax_sum': 'Total_Spending',
-        'Total value before tax_mean': 'Average_Transaction_Amount',
+        'มูลค่ารวมก่อนภาษี_sum': 'Total_Spending',
+        'มูลค่ารวมก่อนภาษี_mean': 'Average_Transaction_Amount',
         'สถานะรายการ_<lambda>': 'Successful_Payment_Rate',
         'จำนวนเงินที่ชำระ_sum': 'Total_Paid_Amount',
-        'Credit Value_sum': 'Total_Credit_Value',
-        'Credit Value_mean': 'Average_Credit_Value',
-        'Credit Term(Day)_mean': 'Average_Credit_Term',
+        'Credit Value_mean': 'Recommended Credit_Value',
+        'Credit Term(Day)_mean': 'Recommended Credit_Term',
         'Customer ID_count': 'Frequency_of_Purchases',
         'Type Of Customer_first': 'Type_Of_Customer'
     }, inplace=True)
-
     # Reset index to make 'Customer ID' a column again
     customer_summary.reset_index(inplace=True)
     return merged_df, customer_summary
 
 
-
-import openai
-from openai import OpenAI
-
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # # Set your OpenAI GPT API key
-client = OpenAI(
+client = openai.OpenAI(
 #    api_key=API_KEY
 )
 
@@ -199,44 +197,18 @@ def assess_risk(customer_summary_row):
         response = client.chat.completions.create(
             model="gpt-4o-mini",  # Use an appropriate model available to you
             messages=[
-{
-    "role": "system",
-    "content": f'''
-You are an expert in credit risk assessment. Your task is to determine the risk level (Very Low, Low, Medium, High, Very High) of a customer based on the provided customer details.
-
-Consider the following guidelines:
-
-- Customers with an average credit value of 0 and an average credit term (Day) of 0 have no debt, which is positive.
-- If a customer has a high average credit term (Day) or high average credit value, the risk should not be classified as Low.
-- Other factors to consider include:
-  - Total Spending
-  - Total Paid Amount
-  - Successful Payment Rate
-  - Frequency of Purchases
-  - Type of Customer
-  - Average Transaction Amount
-
-Please analyze the information step by step and clearly explain your reasoning based on the customer details provided.
-
-**Your response should be in clear and natural Thai.**
-
-**Response Format:**
-
-ความเสี่ยง: [ต่ำมาก/ต่ำ/กลาง/สูง/สูงมาก]
-
-เหตุผล: [คำอธิบายอย่างละเอียดของคุณ] in a paragraph
-
-**Customer Details:**
-
-{customer_details}
-'''
-},
-{
-    "role": "user",
-    "content": "Please determine the risk level (Very Low, Low, Medium, High, Very High) based on the provided information."
-}
+            {"role": "system", "content": f'''
+            คุณเป็นผู้เชี่ยวชาญด้านการเงินสำหรับธุรกิจ SME:
+            ข้อมูลลูกค้า:
+            {customer_details}
+            โปรดวิเคราะห์ตามพฤติกรรมและข้อมูลการซื้อขายของลูกค้าดังนี้:
+            - ระดับความเสี่ยง
+            - ระยะเวลาของเครดิตเทอมที่แนะนำ
+            - วงเงินเครดิตที่แนะนำ
+            . Format your response as: ความเสี่ยง : เหตุผล '''},
+            {"role": "user", "content": "Determine the risk level (ต่ำ, กลาง, สูง)."}
             ],
-            temperature=0.1
+            temperature=0.2
         )
 
         # Return GPT-API response
@@ -269,7 +241,7 @@ def save_to_excel_single(customer_id, customer_type, total_spending, avg_transac
             'Risk Level': [risk_level]
         })
         summary_df.to_excel(writer, sheet_name='Summary', index=False)
-        customer_info[['Total value before tax', 'สถานะรายการ']].to_excel(writer, sheet_name='Customer Activities', index=False)
+        customer_info[['มูลค่ารวมก่อนภาษี', 'สถานะรายการ']].to_excel(writer, sheet_name='Customer Activities', index=False)
     
     # Rewind the BytesIO stream to the beginning for download in Streamlit
     output.seek(0)
@@ -303,8 +275,8 @@ if sale_file and customer_file:
             if customer_info.empty:
                 st.error(f"Customer ID '{customer_id}' not found.")
             else:
-                total_spending = customer_info['Total value before tax'].sum()
-                avg_transaction = customer_info['Total value before tax'].mean()
+                total_spending = customer_info['มูลค่ารวมก่อนภาษี'].sum()
+                avg_transaction = customer_info['มูลค่ารวมก่อนภาษี'].mean()
                 total_paid_amount = customer_info['จำนวนเงินที่ชำระ'].sum()
                 customer_type = customer_info['Type Of Customer'].iloc[0] if 'Type Of Customer' in customer_info.columns else 'Unknown'
                 customer_summary_row = customer_summary[customer_summary['Customer ID'] == customer_id].iloc[0]
