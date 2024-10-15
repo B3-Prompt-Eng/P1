@@ -7,6 +7,7 @@ from autogluon.core.utils.savers import save_pkl
 import openai
 import os
 from io import BytesIO
+import path
 
 dir = path.Path(__file__).abspath()
 sys.path.append(dir.parent.parent)
