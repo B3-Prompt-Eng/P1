@@ -139,21 +139,20 @@ def process_data(sale_file, customer_file):
     # Remove commas and parentheses from all values in filtered_df
     merged_df = merged_df.replace({',': '', r'\(': '', r'\)': ''}, regex=True)
     # st.dataframe(merged_df)
-    a = pd.read_csv("https://raw.githubusercontent.com/B3-Prompt-Eng/P1/refs/heads/main/Program/2024-10-15T10-44_export.csv")
-    st.dataframe(a)
-    if not all(col in merged_df.columns for col in ["Credit Term(Day)", "Credit Value"]):
-        st.write("Predicting Credit Term(Day) and Credit Value...")
+    # if not all(col in merged_df.columns for col in ["Credit Term(Day)", "Credit Value"]):
+    #     st.write("Predicting Credit Term(Day) and Credit Value...")
         
-        labels = ['Credit Term(Day)','Credit Value']  # which columns to predict based on the others
-        problem_types = ['multiclass', 'multiclass']  # type of each prediction problem (optional)
-        eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
+    #     labels = ['Credit Term(Day)','Credit Value']  # which columns to predict based on the others
+    #     problem_types = ['multiclass', 'multiclass']  # type of each prediction problem (optional)
+    #     eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
         
-        multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
-        predictor = multi_predictor.load("https://github.com/B3-Prompt-Eng/P1/tree/4f8c6066596a76531cf82d3ed0efaaf84d2b47f6/Program/P1_Models_New")
-        predictions = predictor.predict(merged_df.drop(['Customer ID'], axis=1))
+    #     multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
+    #     predictor = multi_predictor.load("https://github.com/B3-Prompt-Eng/P1/tree/4f8c6066596a76531cf82d3ed0efaaf84d2b47f6/Program/P1_Models_New")
+    #     predictions = predictor.predict(merged_df.drop(['Customer ID'], axis=1))
         
-        merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
-        merged_df["Credit Value"] = predictions["Credit Value"]
+    #     merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
+    #     merged_df["Credit Value"] = predictions["Credit Value"]
+    
     try:
         merged_df = merged_df.astype({
         "มูลค่ารวมก่อนภาษี": float,
@@ -212,7 +211,8 @@ def assess_risk(customer_summary_row):
     # Call GPT API for risk assessment
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Use an appropriate model available to you
+            # model="o1-preview",  # Use an appropriate model available to you
+            model="gpt-4o",
             messages=[
             {"role": "system", "content": f'''
             คุณเป็นผู้เชี่ยวชาญด้านการเงินสำหรับธุรกิจ SME:
@@ -225,7 +225,7 @@ def assess_risk(customer_summary_row):
             . Format your response as: ความเสี่ยง : เหตุผล '''},
             {"role": "user", "content": "Determine the risk level (ต่ำ, กลาง, สูง)."}
             ],
-            temperature=0.2
+            temperature=0.15
         )
 
         # Return GPT-API response
@@ -270,6 +270,7 @@ st.title("Customer Risk Assessment Tool")
 # File Uploads
 sale_file = st.file_uploader("Upload Sale Data", type=["xlsx", "csv"])
 customer_file = st.file_uploader("Upload Customer Data", type=["xlsx", "csv"])
+
 if sale_file and customer_file:
     st.write("Processing Data...")
     merged_df, customer_summary = process_data(sale_file, customer_file)
@@ -277,12 +278,24 @@ if sale_file and customer_file:
     if merged_df is None or customer_summary is None:
         st.stop()
 
-    st.write("Customer Summary:")
-    st.dataframe(customer_summary)
+    st.write("Customer Summary from the input file:")
+    st.dataframe(customer_summary.drop(["Recommended Credit_Value", "Recommended Credit_Term"], axis=1))
 
     # Input for customer ID
-    customer_id = st.text_input("Enter Customer ID")
-
+    customer_id = st.text_input("Enter Customer ID and enter to view credit term and credit value for single customer")
+    if customer_id:
+        database = pd.read_csv("https://raw.githubusercontent.com/B3-Prompt-Eng/P1/refs/heads/main/Program/2024-10-15T10-43_export.csv)
+        database['Customer ID'] = database['Customer ID'].astype(str).str.zfill(5)
+        database.drop(columns=['Unnamed: 0'], inplace=True)
+        customer_row = database[database['Customer ID'] == customer_id]
+        if not customer_row.empty:
+            st.write("Customer Data:")
+            st.dataframe(customer_row)
+        else:
+            st.write(f"No data found for Customer ID: {customer_id}")
+            
+    if st.button("View recommended credit term and credit value for all customer"):
+        st.dataframe(database)
     col1, col2 = st.columns(2)
 
     with col1:
