@@ -139,6 +139,8 @@ def process_data(sale_file, customer_file):
     # Remove commas and parentheses from all values in filtered_df
     merged_df = merged_df.replace({',': '', r'\(': '', r'\)': ''}, regex=True)
     # st.dataframe(merged_df)
+    a = pd.read_csv("https://raw.githubusercontent.com/B3-Prompt-Eng/P1/refs/heads/main/Program/2024-10-15T10-44_export.csv")
+    st.dataframe(a)
     if not all(col in merged_df.columns for col in ["Credit Term(Day)", "Credit Value"]):
         st.write("Predicting Credit Term(Day) and Credit Value...")
         
