@@ -147,8 +147,7 @@ def process_data(sale_file, customer_file):
         eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
         
         multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
-        with open(path_to_model, 'r') as file:
-            predictor = multi_predictor.load(file)
+        predictor = multi_predictor.load(path_to_model)
         predictions = predictor.predict(merged_df.drop(['Customer ID'], axis=1))
         
         merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
