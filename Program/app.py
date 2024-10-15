@@ -8,6 +8,7 @@ import openai
 import os
 from io import BytesIO
 import path
+import sys
 
 dir = path.Path(__file__).abspath()
 sys.path.append(dir.parent.parent)
