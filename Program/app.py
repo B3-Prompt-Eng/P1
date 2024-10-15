@@ -7,17 +7,10 @@ from autogluon.core.utils.savers import save_pkl
 import openai
 import os
 from io import BytesIO
-import path
-import sys
 
-dir = path.Path(__file__).abspath()
-sys.path.append(dir.parent.parent)
-
-# load model
-path_to_model = './P1_Models_New'
 
 class MultilabelPredictor:
-    multi_predictor_file = "multilabel_predictor.pkl"
+    multi_predictor_file = r"multilabel_predictor.pkl"
 
     def __init__(self, labels, path=None, problem_types=None, eval_metrics=None, consider_labels_correlation=True, **kwargs):
         if len(labels) < 2:
@@ -83,7 +76,6 @@ class MultilabelPredictor:
 
     @classmethod
     def load(cls, path):
-        # Ensure the path is relative and use os.path.join to handle the path properly
         return load_pkl.load(path=os.path.join(path, cls.multi_predictor_file))
 
     def get_predictor(self, label):
@@ -104,6 +96,14 @@ class MultilabelPredictor:
             data[label] = predictor.predict(data, **kwargs)
         return data[self.labels] if not as_proba else predproba_dict
 
+# predicted = {P00001	15	100000
+# P00164	30	80000
+# P50006	30	350000
+# P50053	30	50000
+# P50114	30	50000
+# PF00002	27	66050.5390625
+# PF00018	7	30000
+# PG00001	27	48627.8671875}
 # Function to process sales and customer data
 def process_data(sale_file, customer_file):
     # Read sale data
@@ -132,27 +132,25 @@ def process_data(sale_file, customer_file):
         cus_df = pd.read_csv(customer_file)
     else:
         st.error("Unsupported file format. Please upload an Excel or CSV file.")
-
     # Merge sale and customer data
     merged_df = pd.merge(sale_df, cus_df, on='Customer ID', how='inner')
     merged_df.fillna(0, inplace=True)
     # Remove commas and parentheses from all values in filtered_df
     merged_df = merged_df.replace({',': '', r'\(': '', r'\)': ''}, regex=True)
     # st.dataframe(merged_df)
-    # if not all(col in merged_df.columns for col in ["Credit Term(Day)", "Credit Value"]):
-    #     st.write("Predicting Credit Term(Day) and Credit Value...")
+    if not all(col in merged_df.columns for col in ["Credit Term(Day)", "Credit Value"]):
+        st.write("Predicting Credit Term(Day) and Credit Value...")
         
-    #     labels = ['Credit Term(Day)','Credit Value']  # which columns to predict based on the others
-    #     problem_types = ['multiclass', 'multiclass']  # type of each prediction problem (optional)
-    #     eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
+        labels = ['Credit Term(Day)','Credit Value']  # which columns to predict based on the others
+        problem_types = ['multiclass', 'multiclass']  # type of each prediction problem (optional)
+        eval_metrics = ['accuracy', 'accuracy']  # metrics used to evaluate predictions for each label (optional)
         
-    #     multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
-    #     predictor = multi_predictor.load("https://github.com/B3-Prompt-Eng/P1/tree/4f8c6066596a76531cf82d3ed0efaaf84d2b47f6/Program/P1_Models_New")
-    #     predictions = predictor.predict(merged_df.drop(['Customer ID'], axis=1))
+        multi_predictor = MultilabelPredictor(labels=labels, problem_types=problem_types, eval_metrics=eval_metrics)
+        predictor = multi_predictor.load(r"P1_Models_New")
+        predictions = predictor.predict(merged_df.drop(['Customer ID'], axis=1))
         
-    #     merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
-    #     merged_df["Credit Value"] = predictions["Credit Value"]
-    
+        merged_df["Credit Term(Day)"] = predictions["Credit Term(Day)"]
+        merged_df["Credit Value"] = predictions["Credit Value"]
     try:
         merged_df = merged_df.astype({
         "มูลค่ารวมก่อนภาษี": float,
@@ -187,8 +185,8 @@ def process_data(sale_file, customer_file):
         'มูลค่ารวมก่อนภาษี_mean': 'Average_Transaction_Amount',
         'สถานะรายการ_<lambda>': 'Successful_Payment_Rate',
         'จำนวนเงินที่ชำระ_sum': 'Total_Paid_Amount',
-        'Credit Value_mean': 'Recommended_Credit_Value',
-        'Credit Term(Day)_mean': 'Recommended_Credit_Term',
+        'Credit Value_mean': 'Recommended Credit_Value',
+        'Credit Term(Day)_mean': 'Recommended Credit_Term',
         'Customer ID_count': 'Frequency_of_Purchases',
         'Type Of Customer_first': 'Type_Of_Customer'
     }, inplace=True)
@@ -197,10 +195,13 @@ def process_data(sale_file, customer_file):
     return merged_df, customer_summary
 
 
+
+import openai
+
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # # Set your OpenAI GPT API key
-client = openai.OpenAI(
+client = OpenAI(
 #    api_key=API_KEY
 )
 
