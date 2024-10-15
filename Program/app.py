@@ -261,7 +261,7 @@ st.title("Customer Risk Assessment Tool")
 # File Uploads
 sale_file = st.file_uploader("Upload Sale Data", type=["xlsx", "csv"])
 customer_file = st.file_uploader("Upload Customer Data", type=["xlsx", "csv"])
-model_file = st.file_uploader("Upload Model Folder")
+model_file = st.file_uploader("Upload Model Folder", accept_multiple_files=True)
 if sale_file and customer_file:
     st.write("Processing Data...")
     merged_df, customer_summary = process_data(sale_file, customer_file)
